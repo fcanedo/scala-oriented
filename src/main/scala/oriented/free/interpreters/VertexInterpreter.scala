@@ -30,19 +30,18 @@ sealed trait VertexInterpreter[M[_]] extends (VertexDSL ~> M) {
     */
   def interpretDSL[A](fa: VertexDSL[A]): A = fa match {
     case AddEdgeToVertex(vertex, edgeModel, inVertex, clusterName, of) =>
-      val elements = mapAsJavaMap(of.properties(edgeModel))
-        .asInstanceOf[java.util.Map[java.lang.String, java.lang.Object]]
 
       val orientEdge = clusterName.map { cn =>
         vertex.orientElement.addEdge(
           of.name,
           inVertex.orientElement,
           null,
-          cn,
-          elements)
+          cn)
       }.getOrElse {
-        vertex.orientElement.addEdge(of.name, inVertex.orientElement, null, null, elements)
+        vertex.orientElement.addEdge(of.name, inVertex.orientElement, null, null)
       }
+
+      orientEdge.writeJson(edgeModel, of)
 
       Edge(edgeModel, orientEdge)
     case CountEdges(vertex, dir, of) => vertex.orientElement.countEdges(getDirection(dir), of.name)
@@ -52,7 +51,7 @@ sealed trait VertexInterpreter[M[_]] extends (VertexDSL ~> M) {
         .getEdges(destination.orientElement, getDirection(direction), orientFormat.name)
         .asScala.map { te =>
           val orientEdge = te.asInstanceOf[OrientEdge]
-          Edge(orientFormat.reader.run(orientEdge), orientEdge)
+          Edge(orientEdge.readJson(orientFormat), orientEdge)
         }.toList
 
     case GetEdges(vertex, direction, orientFormat) =>
@@ -62,7 +61,8 @@ sealed trait VertexInterpreter[M[_]] extends (VertexDSL ~> M) {
         .asScala
         .map { te =>
           val orientEdge = te.asInstanceOf[OrientEdge]
-          Edge(orientFormat.reader.run(orientEdge), orientEdge)
+
+          Edge(orientEdge.readJson(orientFormat), orientEdge)
         }.toList
 
     case GetType(vertex) => VertexType(vertex.orientElement.getType)
@@ -72,12 +72,10 @@ sealed trait VertexInterpreter[M[_]] extends (VertexDSL ~> M) {
         .map(_.asInstanceOf[OrientVertex])
         .filter(_.getLabel == orientFormatVertex.name)
         .map { orientVertex =>
-          Vertex(orientFormatVertex.reader.run(orientVertex), orientVertex)
+          Vertex(orientVertex.readJson(orientFormatEdge), orientVertex)
         }.toList
     case UpdateVertex(newModel, orientVertex, orientFormat) =>
-      orientFormat.properties(newModel).foreach { case (key, value) =>
-        orientVertex.setProperty(key, value)
-      }
+      orientVertex.writeJson(newModel, orientFormat)
       Vertex(newModel, orientVertex)
   }
 }

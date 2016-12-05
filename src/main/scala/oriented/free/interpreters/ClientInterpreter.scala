@@ -25,9 +25,7 @@ trait ClientInterpreter[G[_]] extends (ClientDSL ~> G) {
   private def addVertex[A](vertexModel: A, orientFormat: OrientFormat[A]): Vertex[A] = {
     val vertex: OrientVertex = graph.addVertex(s"class:${orientFormat.name}", new util.ArrayList[Any]())
 
-    orientFormat.properties(vertexModel).foreach { case (key, value) =>
-      vertex.setProperty(key, value)
-    }
+    vertex.writeJson(vertexModel, orientFormat)
 
     Vertex(vertexModel, vertex)
   }
@@ -43,9 +41,7 @@ trait ClientInterpreter[G[_]] extends (ClientDSL ~> G) {
       inVertex.orientElement,
       null)
 
-    orientFormat.properties(edgeModel).foreach { case (key, value) =>
-      edge.setProperty(key, value)
-    }
+    edge.writeJson(edgeModel, orientFormat)
 
     Edge(edgeModel, edge)
   }

@@ -31,11 +31,19 @@ libraryDependencies ++= Seq(
   // Scala Libraries
   , "org.scalatest"                %% "scalatest"        % "3.0.0"  % "test"
   , "org.scalacheck"               %% "scalacheck"       % "1.13.2" % "test"
-  , "org.typelevel"                %% "cats"             % "0.7.2"
+  , "org.typelevel"                %% "cats"             % "0.8.1"
   , "org.spire-math"               %% "kind-projector"   % "0.7.1"
   , "com.milessabin"               %% "si2712fix-plugin" % "1.2.0" cross CrossVersion.full
   , "com.chuusai"                  %% "shapeless"        % "2.3.2"
 )
+
+val circeVersion = "0.6.1"
+
+libraryDependencies ++= Seq(
+  "io.circe" %% "circe-core",
+  "io.circe" %% "circe-generic",
+  "io.circe" %% "circe-parser"
+).map(_ % circeVersion % "test")
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1")
 addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full)
