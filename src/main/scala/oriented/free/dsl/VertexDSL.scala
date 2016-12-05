@@ -12,24 +12,24 @@ sealed trait VertexDSL[A]
 /**
   * Constructor for the action that adds an Edge to two vertices (in, out), results in an Edge of type B.
   */
-case class AddEdgeToVertex[A, B, C](vertex: Vertex[A],
+case class AddEdgeToVertex[B](vertex: Vertex[_],
                                     edgeModel: B,
-                                    inVertex: Vertex[C],
+                                    inVertex: Vertex[_],
                                     clusterName: Option[String],
                                     orientFormat: OrientFormat[B]) extends VertexDSL[Edge[B]]
 
 /**
   * Constructor for the action of counting all the edges of a certain Vertex, results in a Long.
   */
-case class CountEdges[A, B](vertex: Vertex[A], direction: Direction, orientFormat: OrientFormat[B]) extends VertexDSL[Long]
+case class CountEdges[B](vertex: Vertex[_], direction: Direction, orientFormat: OrientFormat[B]) extends VertexDSL[Long]
 
 /**
   * Constructor for the action of retrieving all the edges from a specific vertex, resulting in a List of edges of type C.
   * @param destination only vertices that point to this specific vertex will be retrieved.
   * @param direction only vertices in this direction will be retrieved.
   */
-case class GetEdgesDestination[A, B, C](vertex: Vertex[A],
-                                        destination: Vertex[B],
+case class GetEdgesDestination[C](vertex: Vertex[_],
+                                        destination: Vertex[_],
                                         direction: Direction,
                                         orientFormat: OrientFormat[C]) extends VertexDSL[List[Edge[C]]]
 
@@ -37,7 +37,7 @@ case class GetEdgesDestination[A, B, C](vertex: Vertex[A],
   * Constructor for the action of retrieving all the edges from a specific vertex, resulting in a List of edges of type B.
   * @param direction only vertices in this direction will be retrieved.
   */
-case class GetEdges[A, B](vertex: Vertex[A], direction: Direction, orientFormat: OrientFormat[B]) extends VertexDSL[List[Edge[B]]]
+case class GetEdges[B](vertex: Vertex[_], direction: Direction, orientFormat: OrientFormat[B]) extends VertexDSL[List[Edge[B]]]
 
 /**
   * Constructor for the action that gets the type of an Vertex, always resulting in a VertexType of type A.
@@ -67,7 +67,7 @@ class Vertices[F[_]](implicit inject: Inject[VertexDSL, F]) {
                                inVertex: Vertex[C],
                                clusterName: Option[String],
                                orientFormat: OrientFormat[B]): Free[F, Edge[B]] =
-    Free.inject[VertexDSL, F](AddEdgeToVertex[A, B, C](vertex, edgeModel, inVertex, clusterName, orientFormat))
+    Free.inject[VertexDSL, F](AddEdgeToVertex[B](vertex, edgeModel, inVertex, clusterName, orientFormat))
 
   def countEdges[A, B](vertex: Vertex[A], direction: Direction, orientFormat: OrientFormat[B]): Free[F, Long] =
     Free.inject[VertexDSL, F](CountEdges(vertex, direction, orientFormat))
